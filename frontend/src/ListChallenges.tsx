@@ -110,7 +110,7 @@ function ListChallenges({signer}) {
             }
        
 
-            <Button {...buttonProps} onClick={() => getChallenges} colorScheme="blue">Update Challenges</Button>
+            <Button {...buttonProps} onClick={getChallenges} colorScheme="blue">Update Challenges</Button>
         </div>
     )
 }
