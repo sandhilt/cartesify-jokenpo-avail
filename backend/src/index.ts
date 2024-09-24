@@ -1,5 +1,6 @@
 import type { Request, Response } from 'express';
 import { type Hex, toHex } from 'viem';
+import { setTimeout } from "node:timers/promises"
 // import { Challenge, Move } from './Challenge';
 
 import { CartesifyBackend } from "@calindra/cartesify-backend";
@@ -7,14 +8,6 @@ import { greet, Challenge, Move } from "dapp";
 import express from "express";
 
 let dapp: Awaited<ReturnType<typeof CartesifyBackend.createDapp>>;
-
-CartesifyBackend.createDapp().then((initApp) => {
-  initApp.start().catch((e: unknown) => {
-    console.error(e);
-    process.exit(1);
-  });
-  dapp = initApp;
-});
 
 console.log('starting app.js...')
 
@@ -67,7 +60,7 @@ app.get("/challenges", (req: Request, res: Response) => {
       opponentMove = challenge.commitments.get(challenge.opponentAddress)
     }
 
-    const creatorMove:Move = challenge.commitments.get(challenge.creatorAddress) as Move
+    const creatorMove: Move = challenge.commitments.get(challenge.creatorAddress) as Move
 
     challengeList.push({
       "challenge_id": challenge_id,
@@ -189,6 +182,28 @@ app.get("/health", (req: Request, res: Response) => {
 })
 
 
-app.listen(port, () => {
-  console.log(`[server]: Server is running at http://localhost:${port}`);
+async function main() {
+  while (!dapp) {
+    try {
+      dapp = await CartesifyBackend.createDapp()
+    } catch (e) {
+      if (e instanceof Error) console.error(e.message);
+      else console.error(e);
+      console.log('error starting dapp... trying again')
+      await setTimeout(1000);
+    }
+  }
+
+  app.listen(port, () => {
+    console.log(`[server]: Server is running at http://localhost:${port}`);
+  });
+
+  return dapp.start();
+}
+
+main().catch((e) => {
+  console.error(e);
+  process.exit(1);
 });
+
+

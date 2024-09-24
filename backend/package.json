@@ -26,6 +26,7 @@
     "codegen": "ts-node schema.ts",
     "compile": "tsc && esbuild ./src/index.ts --bundle --outfile=dist/index.js --platform=node --target=node20",
     "start": "ROLLUP_HTTP_SERVER_URL=\"http://127.0.0.1:5004\" ts-node src/index.ts",
+    "watch": "ROLLUP_HTTP_SERVER_URL=\"http://127.0.0.1:5004\" node -r ts-node/register --watch --inspect src/index.ts",
     "anvil": "nonodo -d"
   },
   "keywords": [
