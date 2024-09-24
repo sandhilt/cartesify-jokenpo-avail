@@ -1,3 +1,4 @@
+import type { BinaryLike } from 'crypto';
 import * as crypto from 'crypto';
 
 export class Challenge {
@@ -6,7 +7,7 @@ export class Challenge {
     id: number
     createdAt: string
     winnerAddress?: string
-    commitments = new Map<string, Move>(); 
+    commitments = new Map<string, Move>();
 
     constructor(id: number, creatorAddress: string, commitment: string) {
         this.creatorAddress = creatorAddress;
@@ -15,7 +16,7 @@ export class Challenge {
         this.createdAt = new Date().toISOString();
     }
 
-    addOponent = (address: string, commitment:string) => {
+    addOponent = (address: string, commitment: string) => {
         console.log("Adding opponent")
         this.oponentAddress = address
         this.commitments.set(address, new Move(commitment))
@@ -28,8 +29,8 @@ export class Challenge {
         return opponentMove && creatorMove && opponentMove !== 0 && creatorMove !== 0;
     }
 
-    reveal = (address: any, move: any, nonce: any) => {
-        if(!this.commitments.get(this.oponentAddress as string)) {
+    reveal = (address: string, move: string, nonce: string) => {
+        if (!this.commitments.get(this.oponentAddress as string)) {
             throw new Error("Opponent has not commited yet")
         }
 
@@ -46,7 +47,7 @@ export class Challenge {
         this.commitments.set(address, commitedMove);
     }
 
-    generateHash = (hash:any) => {
+    generateHash = (hash: BinaryLike) => {
         const revealedHash = crypto.createHash('sha256').update(hash).digest('hex');
         return revealedHash
     }
@@ -56,17 +57,17 @@ export class Challenge {
         const creatorMove = this.commitments.get(this.creatorAddress)?.move
 
 
-        if(creatorMove === 1 && opponentMove === 3) {
+        if (creatorMove === 1 && opponentMove === 3) {
             this.winnerAddress = this.creatorAddress
-        }else if(creatorMove === 3 && opponentMove === 1) {
+        } else if (creatorMove === 3 && opponentMove === 1) {
             this.winnerAddress = this.oponentAddress
-        }else if(creatorMove === 3 && opponentMove === 2) {
+        } else if (creatorMove === 3 && opponentMove === 2) {
             this.winnerAddress = this.creatorAddress
-        }else if(creatorMove === 2 && opponentMove === 3) {
+        } else if (creatorMove === 2 && opponentMove === 3) {
             this.winnerAddress = this.oponentAddress
-        }else if(creatorMove === 2 && opponentMove === 1) {
+        } else if (creatorMove === 2 && opponentMove === 1) {
             this.winnerAddress = this.creatorAddress
-        }else if(creatorMove === 1 && opponentMove === 2) {
+        } else if (creatorMove === 1 && opponentMove === 2) {
             this.winnerAddress = this.oponentAddress
         }
 
@@ -75,13 +76,13 @@ export class Challenge {
 }
 
 export class Move {
-    NONE:number = 0; 
-    ROCK:number = 1;
-    PAPER:number = 2;
-    SCISSORS:number = 3;
+    NONE: number = 0;
+    ROCK: number = 1;
+    PAPER: number = 2;
+    SCISSORS: number = 3;
 
-    commitment:string;
-    move:number = 0;
+    commitment: string;
+    move: number = 0;
 
     constructor(commitment: string, move: number = 0) {
         this.commitment = commitment;
