@@ -1,0 +1,13 @@
+{
+  "name": "cartesify-jokenpo-avail",
+  "version": "1.0.0",
+  "description": "Tim's Rock Paper Scissors example using Cartesify on Backend and Fronted",
+  "private": "true",
+  "scripts": {
+    "test": " npm run test --workspaces --if-present"
+  },
+  "workspaces": [
+    "frontend",
+    "backend"
+  ]
+}
