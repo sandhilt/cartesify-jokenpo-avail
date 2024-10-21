@@ -2,9 +2,10 @@ import { useState } from 'react'
 import { Button, useToast, Select, Heading, type ButtonProps } from '@chakra-ui/react'
 import { generateCommitment } from './util'
 import { Cartesify } from '@calindra/cartesify'
+import { DAPP_ADDRESS } from './constants'
 
 const fetch = Cartesify.createFetch({
-  dappAddress: '0x70ac08179605AF2D9e75782b8DEcDD3c22aA4D0C',
+  dappAddress: DAPP_ADDRESS,
   endpoints: {
     graphQL: new URL('http://localhost:8080/graphql'),
     inspect: new URL('http://localhost:8080/inspect'),

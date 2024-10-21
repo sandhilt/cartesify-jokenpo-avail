@@ -19,7 +19,7 @@ struct Manager {
 }
 
 #[wasm_bindgen]
-#[derive(PartialEq, Eq, Clone)]
+#[derive(PartialEq, Eq, Clone, Debug)]
 pub enum MoveType {
     None,
     Rock,
@@ -50,7 +50,7 @@ impl From<MoveType> for u32 {
 }
 
 #[wasm_bindgen]
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 struct Move {
     commitment: String,
     move_type: MoveType,
@@ -217,6 +217,9 @@ impl Challenge {
 
         let seed = format!("{}{}", move_type, nonce);
         let reveal_hash = Challenge::generate_hash(seed);
+
+        println!("Reveal hash: {}", reveal_hash);
+        println!("Commitment: {:?}", self.commitments.get(&address));
 
         self.commitments
             .get_mut(&address)

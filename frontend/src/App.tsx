@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react'
 import ListChallenges from './ListChallenges'
 import { Eip1193Provider } from 'ethers'
 import CreateChallenge from './CreateChallenge'
+import { DAPP_ADDRESS } from './constants'
 
 type EthereumFromWindow = import('ethers').Eip1193Provider & import('ethers').AbstractProvider
 declare global {
@@ -18,7 +19,7 @@ declare global {
 
 // replace with the content of your dapp address (it could be found on dapp.json)
 Cartesify.createFetch({
-  dappAddress: '0x70ac08179605AF2D9e75782b8DEcDD3c22aA4D0C',
+  dappAddress: DAPP_ADDRESS,
   endpoints: {
     graphQL: new URL('http://localhost:8080/graphql'),
     inspect: new URL('http://localhost:8080/inspect'),

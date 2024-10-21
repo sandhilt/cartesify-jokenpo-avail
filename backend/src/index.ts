@@ -24,13 +24,17 @@ app.post('/createChallenge', (req: Request, res: Response) => {
   console.log('Create challenge received')
   const payload = req.body
 
-  const commitment: string = payload.commitment
+  const commitment = payload.commitment
 
-  if (!commitment) {
-    throw new Error('Move not chosen')
+  if (!commitment || typeof commitment !== 'string') {
+    throw new Error('Move not chosen or wrong format')
   }
 
-  const sender: string = req.headers['x-msg_sender'] as string
+  const sender = req.headers['x-msg_sender']
+
+  if (typeof sender !== 'string') {
+    throw new Error('Sender not found')
+  }
 
   const challenge = new Challenge(nextId, sender, commitment)
   challenges.set(nextId.toString(), challenge)
@@ -52,6 +56,8 @@ app.get('/challenges', (req: Request, res: Response) => {
   console.log('Request received to list challenges')
   const challengeList: Array<unknown> = []
 
+  console.log('request', req)
+
   for (const [challenge_id, challenge] of challenges.entries()) {
     let opponentMove: Move | undefined = undefined
 
@@ -59,7 +65,7 @@ app.get('/challenges', (req: Request, res: Response) => {
       opponentMove = challenge.commitments.get(challenge.opponentAddress)
     }
 
-    const creatorMove: Move = challenge.commitments.get(challenge.creatorAddress) as Move
+    const creatorMove = challenge.commitments.get(challenge.creatorAddress)
 
     challengeList.push({
       challenge_id: challenge_id,
@@ -68,7 +74,7 @@ app.get('/challenges', (req: Request, res: Response) => {
       winner: challenge.winnerAddress,
       opponent_committed: opponentMove?.move,
       opponent_move: opponentMove?.move,
-      creator_move: creatorMove.move,
+      creator_move: creatorMove?.move,
     })
   }
 
@@ -80,8 +86,8 @@ app.post('/acceptChallenge', (req: Request, res: Response) => {
 
   const payload = req.body
 
-  const commitment: string = payload.commitment
-  const challengeId: string = payload.challengeId
+  const commitment = payload.commitment
+  const challengeId = payload.challengeId
 
   const challenge = challenges.get(challengeId)
 
@@ -94,8 +100,9 @@ app.post('/acceptChallenge', (req: Request, res: Response) => {
   }
 
   if (!commitment) {
-    const buffer = Buffer.from('Commitment not found', 'utf-8')
-    const hexPayload: Hex = `0x${buffer.toString('hex')}`
+    // const buffer = Buffer.from('Commitment not found', 'utf-8')
+    // const hexPayload: Hex = `0x${buffer.toString('hex')}`
+    const hexPayload = toHex('Commitment not found')
 
     dapp.createReport({ payload: hexPayload })
     throw new Error('Commitment not found')
@@ -114,7 +121,10 @@ app.post('/acceptChallenge', (req: Request, res: Response) => {
   challenge.addOpponent(sender, commitment)
   playerChallenges.set(sender, parseInt(challengeId))
 
-  const buffer = Buffer.from(`challenge with id ${challengeId} was accepted by ${sender}`, 'utf-8')
+  const buffer = Buffer.from(
+    `challenge with id ${challengeId} was accepted by ${sender}`,
+    'utf-8',
+  )
   const hexPayload: Hex = `0x${buffer.toString('hex')}`
 
   dapp.createNotice({ payload: hexPayload })
@@ -130,7 +140,11 @@ app.post('/revealMove', (req: Request, res: Response) => {
   const nonce = payload.nonce
   const move = payload.move
 
-  const sender: string = req.headers['x-msg_sender'] as string
+  const sender = req.headers['x-msg_sender']
+
+  if (typeof sender !== 'string') {
+    throw new Error('Sender not found')
+  }
 
   const challengeId = playerChallenges.get(sender)
 
@@ -138,33 +152,45 @@ app.post('/revealMove', (req: Request, res: Response) => {
     throw new Error('Challenge not found')
   }
 
-  const challenge: Challenge = challenges.get(challengeId.toString()) as Challenge
+  const challenge = challenges.get(challengeId.toString())
 
   try {
+    if (!challenge) {
+      throw new Error('Challenge not found')
+    }
+
     challenge.reveal(sender, move, nonce)
 
     if (challenge.bothRevealed()) {
       const winner = challenge.evaluateWinner()
 
       if (!winner) {
-        const buffer = Buffer.from(`challenge ${challengeId} ended in a draw`, 'utf-8')
+        const buffer = Buffer.from(
+          `challenge ${challengeId} ended in a draw`,
+          'utf-8',
+        )
         const hexPayload: Hex = `0x${buffer.toString('hex')}`
 
         dapp.createNotice({ payload: hexPayload })
       }
       else {
-        const buffer = Buffer.from(`challenge ${challengeId} was won by ${winner}`, 'utf-8')
+        const buffer = Buffer.from(
+          `challenge ${challengeId} was won by ${winner}`,
+          'utf-8',
+        )
         const hexPayload: Hex = `0x${buffer.toString('hex')}`
 
         dapp.createNotice({ payload: hexPayload })
       }
+      const opponentAddress = challenge.opponentAddress
+      const creatorAddress = challenge.creatorAddress
 
-      if (playerChallenges.get(challenge?.opponentAddress as string)) {
-        playerChallenges.delete(challenge?.opponentAddress as string)
+      if (opponentAddress && playerChallenges.has(opponentAddress)) {
+        playerChallenges.delete(opponentAddress)
       }
 
-      if (playerChallenges.get(challenge?.creatorAddress as string)) {
-        playerChallenges.delete(challenge?.creatorAddress as string)
+      if (playerChallenges.has(creatorAddress)) {
+        playerChallenges.delete(creatorAddress)
       }
     }
 
