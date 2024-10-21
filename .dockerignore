@@ -1,0 +1,4 @@
+.cartesi
+backend/dist
+backend-rs/target
+**/node_modules

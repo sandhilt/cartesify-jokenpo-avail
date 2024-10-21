@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "description": "TypeScript DApp",
   "private": true,
-  "type": "module",
+  "type": "commonjs",
   "dependencies": {
-    "@calindra/cartesify-backend": "^1.0.1",
+    "@calindra/cartesify-backend": "1.0.1",
     "dapp": "file:../backend-rs/pkg",
     "express": "^5.0.0",
     "openapi-fetch": "^0.12.2",
