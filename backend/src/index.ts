@@ -1,4 +1,3 @@
-import type { Application, Request, Response } from 'express'
 import { type Hex, toHex } from 'viem'
 import { setTimeout } from 'node:timers/promises'
 import { STATUS_CODES } from 'node:http'
@@ -12,7 +11,7 @@ let dapp: Awaited<ReturnType<typeof CartesifyBackend.createDapp>>
 
 console.log('starting app.js...')
 
-const app: Application = express()
+const app = express()
 const port = 8383
 app.use(express.json())
 
@@ -20,7 +19,7 @@ let nextId: number = 0
 const playerChallenges = new Map<string, number>()
 const challenges = new Map<string, Challenge>()
 
-app.post('/createChallenge', (req: Request, res: Response) => {
+app.post('/createChallenge', (req, res) => {
   console.log('Create challenge received')
   const payload = req.body
 
@@ -52,11 +51,9 @@ app.post('/createChallenge', (req: Request, res: Response) => {
   res.status(201).json({ status: STATUS_CODES[201] })
 })
 
-app.get('/challenges', (req: Request, res: Response) => {
+app.get('/challenges', (req, res) => {
   console.log('Request received to list challenges')
   const challengeList: Array<unknown> = []
-
-  console.log('request', req)
 
   for (const [challenge_id, challenge] of challenges.entries()) {
     let opponentMove: Move | undefined = undefined
@@ -81,7 +78,7 @@ app.get('/challenges', (req: Request, res: Response) => {
   res.send({ challenges: challengeList })
 })
 
-app.post('/acceptChallenge', (req: Request, res: Response) => {
+app.post('/acceptChallenge', (req, res) => {
   console.log('Request received to accept challenges')
 
   const payload = req.body
@@ -132,7 +129,7 @@ app.post('/acceptChallenge', (req: Request, res: Response) => {
   res.send({ status: 'ACCEPTED' })
 })
 
-app.post('/revealMove', (req: Request, res: Response) => {
+app.post('/revealMove', (req, res) => {
   console.log('Request received to revel move')
 
   const payload = req.body
@@ -197,12 +194,12 @@ app.post('/revealMove', (req: Request, res: Response) => {
     res.send({ status: 'REVEALED' })
   }
   catch (e) {
-    console.log('Error is ', e)
+    console.log('Error is', e)
     res.status(500).send({ status: 'ERROR' })
   }
 })
 
-app.get('/health', (req: Request, res: Response) => {
+app.get('/health', (req, res) => {
   greet()
   res.send({ status: 'UP' })
 })
